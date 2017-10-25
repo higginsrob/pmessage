@@ -1,0 +1,22 @@
+{
+  "name": "pmessage",
+  "version": "1.0.0",
+  "description": "promise powered window.postmessage",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test.js"
+  },
+  "author": "Rob Higgins <higginsrob@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/higginsrob/pmessage.git"
+  },
+  "devDependencies": {
+    "eslint": "^4.9.0",
+    "mocha": "^4.0.1"
+  },
+  "dependencies": {
+    "uuid": "^3.1.0"
+  }
+}

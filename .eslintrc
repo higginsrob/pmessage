@@ -1,0 +1,19 @@
+{
+    "rules": {
+        "no-loop-func": "warn",
+        "no-undef": "warn",
+        "no-unused-vars": "warn",
+        "curly": "warn",
+        "quotes": ["warn", "single"],
+        "eqeqeq": "warn",
+        "strict": ["error", "global"],
+        "semi": ["warn"],
+        "keyword-spacing": ["warn", {
+            "before": true
+        }]
+    },
+    "env": {
+        "browser": true
+    }
+}
+
