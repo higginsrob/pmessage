@@ -1,4 +1,9 @@
 {
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module"
+    },
     "rules": {
         "no-loop-func": "warn",
         "no-undef": "warn",
@@ -13,7 +18,9 @@
         }]
     },
     "env": {
-        "browser": true
+        "node": true,
+        "browser": true,
+        "es6": true
     }
 }
 
