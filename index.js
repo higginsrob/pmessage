@@ -4,9 +4,9 @@ module.exports = function Pmessage(props) {
 
     const scope = this;
     const state = scope.state = Object.assign({
-        target: window.parent,
+        source: window.parent,
         secure: false,
-        timeout: 3000,
+        timeout: 1000,
         timeouts: {},
         origin: '*'
     }, props);
@@ -26,7 +26,7 @@ module.exports = function Pmessage(props) {
         Object.keys(scope.listeners).forEach(key => {
             if (e.data && e.data.type === key && e.data.uid && scope.listeners[key].length) {
                 scope.listeners[key].forEach(listener => {
-                    scope.emit(e.data.uid, listener(e.data.payload), e.data.uid, e.data.id);
+                    scope.emit(e.data.uid, listener(e.data.payload, e), e.data.uid, e.source);
                 });
             }
         });
@@ -42,15 +42,16 @@ module.exports = function Pmessage(props) {
         if (!scope.listeners[event]) {
             scope.listeners[event] = [];
         }
-        scope.listeners[event].push((...args) => {
-            return fn.apply(scope, [...args]);
-        });
+        scope.listeners[event].push(fn);
     };
 
     scope.once = function(event, fn) {
-        var wrapFn = () => {
-            fn(event);
-            scope.off(event);
+        var wrapFn = (...args) => {
+            const index = scope.listeners[event].indexOf(fn);
+            if (index > -1) {
+                delete scope.listeners[event][index];
+            }
+            fn.apply(scope, args);
         };
         scope.on(event, wrapFn);
     };
@@ -69,16 +70,16 @@ module.exports = function Pmessage(props) {
             state.timeouts[uid] = window.setTimeout(() => {
                 reject('PM Timeout Error: type: ' + type + ', uid: ' + uid);
             }, state.timeout);
-            scope.emit(type, payload, uid);
+            scope.emit(type, payload, uid, state.source);
         });
     };
 
-    scope.emit = function(type, payload, uid) {
-        if (!state.target) {
-            throw new Error('target window not set');
+    scope.emit = function(type, payload, uid, source) {
+        if (!source) {
+            throw new Error('source window not set');
         }
-        state.target.postMessage(
-            {type, payload, uid, id: state.id},
+        source.postMessage(
+            {type, payload, uid},
             state.secure
             ? window.location.origin
             : state.origin
