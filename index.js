@@ -4,7 +4,7 @@ module.exports = function Pmessage(props) {
 
     const scope = this;
     const state = scope.state = Object.assign({
-        source: window.parent,
+        source: window.opener || window.parent,
         secure: false,
         timeout: 1000,
         timeouts: {},
@@ -23,6 +23,7 @@ module.exports = function Pmessage(props) {
         if (!allowed) {
             throw new Error('origin not allowed');
         }
+        console.log(window.opener, window.parent);
         Object.keys(scope.listeners).forEach(key => {
             if (e.data && e.data.type === key && e.data.uid && scope.listeners[key].length) {
                 scope.listeners[key].forEach(listener => {
@@ -60,7 +61,7 @@ module.exports = function Pmessage(props) {
         delete scope.listeners[event];
     };
 
-    scope.send = function(type, payload) {
+    scope.send = function(type, payload, source) {
         return new Promise((respond, reject) => {
             var uid = uuid();
             scope.once(uid, payload => {
@@ -68,15 +69,15 @@ module.exports = function Pmessage(props) {
                 respond(payload);
             });
             state.timeouts[uid] = window.setTimeout(() => {
-                reject('PM Timeout Error: type: ' + type + ', uid: ' + uid);
+                reject('pmessage timeout: ' + type);
             }, state.timeout);
-            scope.emit(type, payload, uid, state.source);
+            scope.emit(type, payload, uid, source || state.source);
         });
     };
 
     scope.emit = function(type, payload, uid, source) {
         if (!source) {
-            throw new Error('source window not set');
+            throw new Error('invalid source');
         }
         source.postMessage(
             {type, payload, uid},
